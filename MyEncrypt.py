@@ -12,6 +12,7 @@ def MyEncrypt(message, key):
 	len_encrypted = encryptor.update_into(message, buf)
 	C = bytes(buf[:len_encrypted]) + encryptor.finalize()
 	return (C, IV)
+#make object to pad, make sure its PKCS7 use that to pad, no magic numbers
 
 def MyFileEncrypt(filepath):
 	key = os.urandom(32)
