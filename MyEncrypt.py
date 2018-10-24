@@ -1,4 +1,6 @@
 import os
+import base64
+import json
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -19,7 +21,6 @@ def MyEncrypt(message, key):
 	print("padded_data: " + str(padded_data))
 	C = encryptor.update(padded_data) + encryptor.finalize()
 	return (C, IV)
-#make object to pad, make sure its PKCS7 use that to pad, no magic numbers
 
 def MyFileEncrypt(filepath):
 	bits = 32;
@@ -46,6 +47,7 @@ def MyDecrypt(C, IV, key, ext):
 	print("unpadded decrypt: " + str(output))
 	f = open("decrypt" + ext, 'w+')
 	f.write(str(output))
+	f.close()
 
 #part 1 test
 print("Part 1 test")
@@ -53,6 +55,8 @@ test = MyFileEncrypt("test.txt")
 MyDecrypt(test[0], test[1], test[2], test[3])
 
 #part 2
+#hmac cipher text not message
+#how would you combine integrity and confidentiality and why
 def MyEncryptMAC(message, EncKey, HMACKey):
 	bits = 16;
 	backend = default_backend()
@@ -67,16 +71,16 @@ def MyEncryptMAC(message, EncKey, HMACKey):
 
 	tag = hmac.HMAC(HMACKey, hashes.SHA256(), backend=default_backend())
 	tag.update(C)
-	tag.finalize()
-	return(C, IV, tag)
+	return(C, IV, tag.finalize())
 
 def MyFileEncryptMAC(filepath):
-	EncKey = os.urandom(32)
-	HMACKey = os.urandom(32)
-	f = open(filepath, 'r')
+	bits = 32
+	EncKey = os.urandom(bits)
+	HMACKey = os.urandom(bits)
 	ext = os.path.splitext(filepath)[1]
-	message = f.read()
-	message = bytes(message.encode('utf8'))
+	with open(filepath, "rb") as message:
+		messageStr = base64.b64encode(message.read())
+	message = bytes(messageStr)
 	cipher = MyEncryptMAC(message, EncKey, HMACKey)
 	C = cipher[0]
 	IV = cipher[1]
@@ -87,17 +91,24 @@ def MyDecryptMAC(C, IV, tag, EncKey, HMACKey, ext):
 	backend = default_backend()
 	h = hmac.HMAC(HMACKey, hashes.SHA256(), backend=default_backend())
 	h.update(C)
-	h.verify(C)
-	h = h.finalize()
+	try:
+		h.verify(tag)
 
-	cipher = Cipher(algorithms.AES(EncKey), modes.CBC(IV), backend=backend)
-	decryptor = cipher.decryptor()
-	output = decryptor.update(C)
-	unpadder = padding.PKCS7(blockSize).unpadder()
-	output = unpadder.update(output)
-	output = output + unpadder.finalize()
-	f = open("decryptMAC" + ext, 'w+')
-	f.write(str(output))
+		cipher = Cipher(algorithms.AES(EncKey), modes.CBC(IV), backend=backend)
+		decryptor = cipher.decryptor()
+		output = decryptor.update(C)
+		unpadder = padding.PKCS7(blockSize).unpadder()
+		string = unpadder.update(output)
+		string = string + unpadder.finalize()
+		f = open("decryptMAC" + ext, 'wb')
+		output = base64.b64decode(string)
+		f.write(output)
+		f.close()
+	except:
+		print("Invalid tag")
+	with open('decryptMAC.json', 'w') as jsonFile:
+		data = (str(C), str(IV), str(tag), str(EncKey), str(HMACKey), ext)
+		json.dump(data, jsonFile)
 
-# test = MyFileEncryptMAC("test.txt")
-# MyDecryptMAC(test[0], test[1], test[2], test[3], test[4], test[5])
+test = MyFileEncryptMAC("thumb.jpg")
+MyDecryptMAC(test[0], test[1], test[2], test[3], test[4], test[5])
