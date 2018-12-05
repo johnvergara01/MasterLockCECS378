@@ -9,11 +9,11 @@ def WalkDecrypt(dir):
             if ".json" in i:
                 with open(dir+"/"+i) as f:
                     data=json.load(f)
-                    RSACipher = base64.b64decode(data["RSACipher"])
+                    RSACipher = base64.b64decode(data["RSACipher"].encode('ascii'))
                     #RSACipher = bytes(data["RSACipher"], encoding='ascii')
-                    C = base64.b64decode(data["C"])
-                    IV = base64.b64decode(data["IV"])
-                    tag = base64.b64decode(data["tag"])
+                    C = base64.b64decode(data["C"].encode('ascii'))
+                    IV = base64.b64decode(data["IV"].encode('ascii'))
+                    tag = base64.b64decode(data["tag"].encode('ascii'))
                     #C = str.encode((data["C"]))
                     #IV = str.encode(data["IV"])
                     #tag = str.encode(data["tag"])
