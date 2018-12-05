@@ -19,13 +19,16 @@ def MyDecryptMAC(C, IV, tag, EncKey, HMACKey, ext):
         unpadder = padding.PKCS7(Constants.blockSize).unpadder()
         string = unpadder.update(output)
         string = string + unpadder.finalize()
-        f = open("decryptMAC" + ext, 'wb')
+        #f = open("decryptMAC" + ext, 'wb')
         output = base64.b64decode(string)
-        f.write(output)
-        f.close()
-        with open('decryptMAC.json', 'w') as jsonFile:
-            data = (str(C), str(IV), str(tag), str(EncKey), str(HMACKey), ext)
-            json.dump(data, jsonFile)
         return output
     except:
         print("Invalid tag")
+    #     f.write(output)
+    #     f.close()
+    #     with open('decryptMAC.json', 'w') as jsonFile:
+    #         data = (str(C), str(IV), str(tag), str(EncKey), str(HMACKey), ext)
+    #         json.dump(data, jsonFile)
+    #     return output
+    # except:
+    #     print("Invalid tag")

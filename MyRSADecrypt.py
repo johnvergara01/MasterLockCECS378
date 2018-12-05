@@ -11,4 +11,5 @@ def MyRSADecrypt(RSACipher, C, IV, tag, ext, RSA_Privatekey_filepath):
     EncKey = key[:32]
     HMACKey = key[-32:]
 
-    MyDecryptMAC.MyDecryptMAC(C, IV, tag, EncKey, HMACKey, ext)
+    output = MyDecryptMAC.MyDecryptMAC(C, IV, tag, EncKey, HMACKey, ext)
+    return output
