@@ -5,6 +5,8 @@ import Walk
 import WalkDecrypt
 import os
 
-Walk.Walk(r"C:\Users\johnv\Downloads\TestFolder")
-os.system("pause")
-WalkDecrypt.WalkDecrypt(r"C:\Users\johnv\Downloads\TestFolder")
+def main():
+    Walk.Walk(r"C:\Users\johnv\Downloads\TestFolder")
+    WalkDecrypt.WalkDecrypt(r"C:\Users\johnv\Downloads\TestFolder")
+
+if __name__ == '__main__':main()
